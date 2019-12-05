@@ -1,8 +1,8 @@
 import socket
 import time
 
-IP = 'localhost'
-PORT = 8210
+IP = '192.168.0.116'
+PORT = 8201
 
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
