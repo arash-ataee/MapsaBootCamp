@@ -1,16 +1,21 @@
+import tkinter as tk
 import socket
 import select
 import time
 import sys
 
-IP = 'localhost'
-PORT = 8218
+IP = '192.168.1.53'
+PORT = 8220
 username = input("Enter your username: ")
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server_socket.connect((IP, PORT))
-server_socket.setblocking(0)
+server_socket.setblocking(1)
 
 socket_list = [server_socket]
+
+
+
+
 
 server_socket.send(bytes(username, 'utf8'))
 error1 = None
@@ -18,7 +23,6 @@ while not error1:
     try:
         while not error1:
             error1 = server_socket.recv(1024).decode('utf-8')
-            print('1',error1)
     except IOError as e:
         pass
     if error1 == 'error1':
@@ -40,19 +44,22 @@ else:
             audience = input('{} is offline enter other audience username: '.format(audience))
             server_socket.send(bytes(audience, 'utf-8'))
             error2 = None
+        if error2 == 'wait':
+            print('please wait')
 
 while True:
     read_socket, write_socket, excepted_socket = select.select(socket_list, socket_list, socket_list)
-    if read_socket:
-        for s in read_socket:
-            print(s.recv(1024).decode('utf-8'))
-    if write_socket:
-        for s in write_socket:
-            message = input('->')
-            s.send(bytes(message, 'utf-8'))
-    else:
-        for s in excepted_socket:
+    print(read_socket)
+    for s in read_socket:
+        msg = s.recv(1024)
+        if msg:
+            print(msg.decode('utf-8'))
+        if not msg:
             socket_list.remove(s)
             print("Connection Closed!")
+
+    for s in write_socket:
+        message = input('->')
+        s.send(bytes(message, 'utf-8'))
 
 #    time.sleep(5)

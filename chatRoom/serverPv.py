@@ -2,8 +2,8 @@ import socket
 import time
 import select
 
-IP = 'localhost'
-PORT = 8218
+IP = ''
+PORT = 8220
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -35,31 +35,34 @@ while True:
                 client_socket.send(bytes('accepted1', 'utf-8'))
                 clients[username] = client_socket
                 print("Connection Established from {}".format(address))
-                audience = None
-                while not audience:
-                    try:
-                        while not audience:
-                            audience = client_socket.recv(1024).decode('utf-8')
-                    except IOError as e:
-                        pass
-                    if audience not in clients:
-                        client_socket.send(bytes('error2', 'utf-8'))
-                        audience = None
-                client_socket.send(bytes('error2', 'utf-8'))
 
-                audiences[client_socket] = audience
-                audiences[audience] = client_socket
-                continue
+
 
 
         else:
-            message = s.recv(1024)
-            print(message)
-            if not message:
-                socket_list.remove(s)
-                del clients[s]
-                continue
-            audiences[audiences[s]].send(message)
+            if s not in audiences:
+                audience = None
+                if not audience:
+                    try:
+                        if not audience:
+                            audience = s.recv(1024).decode('utf-8')
+                    except IOError as e:
+                        pass
+                    if audience not in clients:
+                        s.send(bytes('error2', 'utf-8'))
+                        audience = None
+                    else:
+                        s.send(bytes('wait', 'utf-8'))
+                        audiences[s] = audience
+            else:
+                message = s.recv(1024).decode('utf-8')
+                print(message)
+                if not message:
+                    socket_list.remove(s)
+                    del clients[s]
+                    continue
+                clients[audiences[s]].send(bytes(message + '\n', 'utf-8'))
+
     for s in exception_socket:
         socket_list.remove(s)
         del clients[s]
